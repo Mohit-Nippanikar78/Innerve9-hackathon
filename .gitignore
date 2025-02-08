@@ -1,0 +1,3 @@
+*.pyc
+backend/.env
+backend/cloudinary_uploader/.env

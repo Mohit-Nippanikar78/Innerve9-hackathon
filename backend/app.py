@@ -20,13 +20,15 @@ from twilio.rest import Client
 from twilio.twiml.voice_response import VoiceResponse, Connect
 from dotenv import load_dotenv
 from prompt_manager.prompt import prompts
+from agent import process_query
+from fastapi.middleware.cors import CORSMiddleware
 
 load_dotenv()
 
 
 
 # Configuration
-OPENAI_API_KEY = os.getenv('OPENAI_API_KEY') # requires OpenAI Realtime API Access
+OPENAI_API_KEY = os.getenv('OPEN_AI_API') # requires OpenAI Realtime API Access
 TWILIO_ACCOUNT_SID = os.getenv('TWILIO_ACCOUNT_SID')
 TWILIO_AUTH_TOKEN = os.getenv('TWILIO_AUTH_TOKEN')
 TWILIO_PHONE_NUMBER = os.getenv('TWILIO_MOBILE_NO')
@@ -43,6 +45,15 @@ LOG_EVENT_TYPES = [
 
 
 app = FastAPI()
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allows all origins
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all methods
+    allow_headers=["*"],  # Allows all headers
+)
 
 
 if not OPENAI_API_KEY:
@@ -267,6 +278,40 @@ async def call_mobile_number(mobile_number: str = '+918879109025'):
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
+
+@app.post('/process_query')
+async def process_query_endpoint(request: Request):
+    try:
+        query = None
+        
+        # Check if content type is JSON
+        if request.headers.get("content-type") == "application/json":
+            data = await request.json()
+            query = data.get("query")
+        else:
+            # Handle form data
+            form_data = await request.form()
+            query = form_data.get("query")
+
+        if not query:
+            return JSONResponse(
+                status_code=400,
+                content={"error": "Query parameter is required"}
+            )
+
+        # Process the query using the imported process_query function
+        print(f"Processing query: {query}")
+        # response = process_query(query)
+        response = "**This is a test response**\n\n- Point 1\n- Point 2\n\n*Additional details here*"
+        
+        return JSONResponse(content={"response": response})
+
+    except Exception as e:
+        print(f"Error processing query: {str(e)}")
+        return JSONResponse(
+            status_code=500,
+            content={"error": f"Failed to process query: {str(e)}"}
+        )
 
 
 if __name__ == "__main__":
