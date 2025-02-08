@@ -1,13 +1,7 @@
 # Smart ITR Filing Assistant
 
 ## Demo Video
-Click below to watch the demo video (opens in new tab):  
-[![Watch Demo Video](https://img.shields.io/badge/Watch-Demo_Video-blue?style=for-the-badge&logo=video)](./simple.ai%20demo%20video.mp4)
-
-You can also:
-1. Download the video file directly: [simple.ai demo video.mp4](./simple.ai%20demo%20video.mp4)
-2. Open it in your default media player
-3. Or right-click and select "Open in new tab"
+https://github.com/user-attachments/assets/17e86b99-5ba4-4f27-a622-6502a4007498
 
 ## Overview
 A comprehensive Income Tax Return (ITR) filing assistant powered by AI, designed to simplify the tax filing process and provide personalized financial guidance.
@@ -130,11 +124,6 @@ npm run dev
 
 ## Contributing
 Contributions are welcome! Please feel free to submit a Pull Request.
-
-## Team
-- **Rachit Chheda** - Full Stack Developer
-- **Mohit Nippanikar** - Full Stack Developer
-- **Meet Patel** - AI/ML Developer
 
 ## License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details. 
