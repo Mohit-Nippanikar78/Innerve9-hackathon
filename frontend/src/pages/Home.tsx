@@ -1,30 +1,54 @@
 import { Link } from 'react-router-dom';
-import { TrendingUp, Shield, Brain, BarChart as ChartBar } from 'lucide-react';
+import { FileText, Calculator, Brain, MessageSquare, Phone } from 'lucide-react';
+import { useState } from 'react';
 
 const features = [
   {
-    icon: <TrendingUp className="h-6 w-6 text-white" />,
-    title: 'Real-Time Indian Market Insights',
-    description: 'Get instant updates on NIFTY, SENSEX, and personalized insights powered by AI.'
+    icon: <MessageSquare className="h-6 w-6 text-white" />,
+    title: 'Interactive Chat Interface',
+    description: 'User-friendly conversational interface with text and voice input support for seamless ITR filing guidance.'
   },
   {
-    icon: <Shield className="h-6 w-6 text-white" />,
-    title: 'Smart Portfolio Management',
-    description: 'Receive tailored investment suggestions for Indian markets based on your goals.'
+    icon: <FileText className="h-6 w-6 text-white" />,
+    title: 'Smart Form Selection',
+    description: 'Intelligent recommendation of appropriate ITR forms based on your income sources and financial profile.'
+  },
+  {
+    icon: <Calculator className="h-6 w-6 text-white" />,
+    title: 'Tax Calculation & Savings',
+    description: 'Accurate tax liability calculation and personalized tax-saving investment recommendations.'
   },
   {
     icon: <Brain className="h-6 w-6 text-white" />,
-    title: 'Learn & Grow',
-    description: 'Access educational resources about Indian markets and improve your financial literacy.'
-  },
-  {
-    icon: <ChartBar className="h-6 w-6 text-white" />,
-    title: 'Market Analysis',
-    description: 'Stay ahead with AI-powered analysis of Indian stock market trends and predictions.'
+    title: 'AI-Powered Assistance',
+    description: 'Advanced AI technology to provide accurate, up-to-date tax filing guidance and investment advice.'
   }
 ];
 
 const Home = () => {
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [requestStatus, setRequestStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+
+  const handleCallRequest = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!phoneNumber.match(/^[0-9]{10}$/)) {
+      alert('Please enter a valid 10-digit phone number');
+      return;
+    }
+    
+    setRequestStatus('loading');
+    try {
+      // Simulate API call - Replace with actual API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      setRequestStatus('success');
+      setPhoneNumber('');
+      setTimeout(() => setRequestStatus('idle'), 3000);
+    } catch (error) {
+      setRequestStatus('error');
+      setTimeout(() => setRequestStatus('idle'), 3000);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
@@ -34,21 +58,21 @@ const Home = () => {
             <main className="mt-10 mx-auto max-w-7xl px-4 sm:mt-12 sm:px-6 md:mt-16 lg:mt-20 lg:px-8 xl:mt-28">
               <div className="sm:text-center lg:text-left">
                 <h1 className="text-4xl tracking-tight font-extrabold text-gray-900 sm:text-5xl md:text-6xl">
-                  <span className="block text-primary">Your AI-Powered</span>
-                  <span className="block">Investment Partner for <span className="text-primary">Indian Markets!</span></span>
+                  <span className="block text-primary">Smart ITR Filing</span>
+                  <span className="block">Made <span className="text-primary">Simple!</span></span>
                 </h1>
                 <p className="mt-3 text-base text-gray-600 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
-                  Make smarter investment decisions in Indian markets with AI-driven insights, personalized recommendations, and real-time analysis of NIFTY and SENSEX.
+                  Navigate your Income Tax Return filing journey with our AI-powered chatbot. Get personalized guidance, form recommendations, and tax-saving tips through a simple conversation.
                 </p>
                 <div className="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start">
                   <div className="rounded-md shadow">
                     <Link to="/sign-up" className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-primary hover:bg-primary/90 md:py-4 md:text-lg md:px-10 transition-all duration-300">
-                      Get Started
+                      Start Filing ITR
                     </Link>
                   </div>
                   <div className="mt-3 sm:mt-0 sm:ml-3">
-                    <Link to="/portfolio/learn" className="w-full flex items-center justify-center px-8 py-3 border-2 border-primary text-base font-medium rounded-md text-primary hover:bg-primary hover:text-white md:py-4 md:text-lg md:px-10 transition-all duration-300">
-                      Learn More
+                    <Link to="/portfolio/chatbot" className="w-full flex items-center justify-center px-8 py-3 border-2 border-primary text-base font-medium rounded-md text-primary hover:bg-primary hover:text-white md:py-4 md:text-lg md:px-10 transition-all duration-300">
+                      Try Chatbot
                     </Link>
                   </div>
                 </div>
@@ -59,8 +83,8 @@ const Home = () => {
         <div className="lg:absolute lg:inset-y-0 lg:right-0 lg:w-1/2">
           <img
             className="h-56 w-full object-cover sm:h-72 md:h-96 lg:w-full lg:h-full"
-            src="https://images.unsplash.com/photo-1551434678-e076c223a692?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=2850&q=80"
-            alt="Analytics Dashboard"
+            src="https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2850&q=80"
+            alt="ITR Filing Assistant"
           />
         </div>
       </div>
@@ -70,10 +94,10 @@ const Home = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
-              Powerful Features for <span className="text-primary">Smart Investing</span>
+              Simplify Your <span className="text-primary">Tax Filing</span> Journey
             </h2>
             <p className="mt-4 max-w-2xl text-xl text-gray-600 mx-auto">
-              Everything you need to make informed investment decisions and grow your wealth.
+              Our smart chatbot guides you through every step of the ITR filing process with ease and accuracy.
             </p>
           </div>
 
@@ -96,6 +120,76 @@ const Home = () => {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Request a Call Section */}
+      <div className="bg-white py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="relative bg-primary rounded-3xl shadow-xl overflow-hidden">
+            <div className="absolute inset-0">
+              <div className="absolute inset-0 bg-gradient-to-r from-primary to-secondary opacity-90" />
+            </div>
+            <div className="relative px-8 py-12 sm:px-12 sm:py-16 lg:py-20">
+              <div className="max-w-2xl mx-auto text-center">
+                <h2 className="text-3xl font-extrabold text-white sm:text-4xl">
+                  <span className="block">Need Personal Tax Guidance?</span>
+                  <span className="block text-white/90 mt-2">Request a Call Back</span>
+                </h2>
+                <p className="mt-4 text-lg leading-6 text-white/80">
+                  Enter your phone number below and our tax experts will call you back within 24 hours to provide personalized ITR filing guidance.
+                </p>
+                <form onSubmit={handleCallRequest} className="mt-8 sm:flex justify-center">
+                  <div className="min-w-0 flex-1">
+                    <label htmlFor="phone" className="sr-only">
+                      Phone number
+                    </label>
+                    <input
+                      type="tel"
+                      pattern="[0-9]{10}"
+                      maxLength={10}
+                      value={phoneNumber}
+                      onChange={(e) => setPhoneNumber(e.target.value)}
+                      placeholder="Enter your 10-digit phone number"
+                      className="block w-full px-5 py-3 text-base text-gray-900 placeholder-gray-500 border border-transparent rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-primary"
+                      required
+                    />
+                  </div>
+                  <div className="mt-4 sm:mt-0 sm:ml-3">
+                    <button
+                      type="submit"
+                      disabled={requestStatus === 'loading'}
+                      className={`block w-full px-5 py-3 text-base font-medium text-primary bg-white border border-transparent rounded-md shadow hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-primary sm:px-10 ${
+                        requestStatus === 'loading' ? 'opacity-75 cursor-not-allowed' : ''
+                      }`}
+                    >
+                      {requestStatus === 'loading' ? (
+                        <span className="flex items-center justify-center">
+                          <svg className="animate-spin h-5 w-5 mr-3 text-primary" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                          </svg>
+                          Processing...
+                        </span>
+                      ) : requestStatus === 'success' ? (
+                        <span className="flex items-center justify-center text-green-600">
+                          <Phone className="h-5 w-5 mr-2" />
+                          Request Sent!
+                        </span>
+                      ) : requestStatus === 'error' ? (
+                        'Error. Try Again'
+                      ) : (
+                        'Request Call'
+                      )}
+                    </button>
+                  </div>
+                </form>
+                <p className="mt-4 text-sm text-white/70">
+                  By submitting this form, you agree to receive a callback from our tax experts.
+                </p>
+              </div>
             </div>
           </div>
         </div>

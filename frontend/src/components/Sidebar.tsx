@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { BarChart2, BookOpen, TrendingUp, User, LayoutDashboard, Database, MessageSquare, HelpCircle, Calculator } from 'lucide-react';
+import { BarChart2, BookOpen, TrendingUp, User, LayoutDashboard, Database, MessageSquare, HelpCircle, Calculator, Bot } from 'lucide-react';
 import { useUser } from '@clerk/clerk-react';
 import { useTour } from '../context/TourContext';
 
@@ -10,11 +10,12 @@ const Sidebar = () => {
 
   const menuItems = [
     { path: '/portfolio', icon: LayoutDashboard, label: 'Portfolio', tourClass: 'tour-portfolio' },
+    { path: '/portfolio/chatbot', icon: Bot, label: 'Chatbot', tourClass: 'tour-chatbot' },
     { path: '/portfolio/my-data', icon: Database, label: 'My Data', tourClass: 'tour-my-data' },
     { path: '/portfolio/tax-calculator', icon: Calculator, label: 'Tax Calculator', tourClass: 'tour-tax-calculator' },
     { path: '/portfolio/recommendations', icon: TrendingUp, label: 'Recommendations', tourClass: 'tour-recommendations' },
     { path: '/portfolio/learn', icon: BookOpen, label: 'Money Matters', tourClass: 'tour-learn' },
-    { path: '/portfolio/chatbot', icon: MessageSquare, label: 'AI Assistant', tourClass: 'tour-ai-assistant' },
+    { path: '/portfolio/ai-assistant', icon: MessageSquare, label: 'AI Assistant', tourClass: 'tour-ai-assistant' },
   ];
 
   return (

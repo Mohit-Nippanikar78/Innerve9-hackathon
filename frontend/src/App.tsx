@@ -13,8 +13,9 @@ import Learn from './pages/Learn';
 import Profile from './pages/Profile';
 import AuthComponent from './components/AuthComponent';
 import DashboardLayout from './components/DashboardLayout';
-import Chatbot from './pages/Chatbot';
+import AIAssistant from './pages/AIAssistant.tsx';
 import TaxCalculator from './pages/TaxCalculator';
+import Chatbot from './pages/Chatbot.tsx';
 
 const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
@@ -75,6 +76,13 @@ function App() {
                   <ProtectedRoute>
                     <DashboardLayout>
                       <Profile />
+                    </DashboardLayout>
+                  </ProtectedRoute>
+                } />
+                <Route path="/portfolio/ai-assistant" element={
+                  <ProtectedRoute>
+                    <DashboardLayout>
+                      <AIAssistant />
                     </DashboardLayout>
                   </ProtectedRoute>
                 } />

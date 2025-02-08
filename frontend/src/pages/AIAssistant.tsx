@@ -1,47 +1,85 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Send, Bot, User, Volume2, VolumeX, Mic, MicOff, X } from 'lucide-react';
+import { Send, Bot, User, Volume2, VolumeX, Mic, MicOff, X, ChevronRight, CheckCircle2 } from 'lucide-react';
 import axios from 'axios';
-import ReactMarkdown from 'react-markdown';
-import { API_ENDPOINTS } from '../utils';
 
 interface Message {
   type: 'user' | 'bot';
   content: string | string[];
   timestamp: Date;
   isThinking?: boolean;
+  isTyping?: boolean;
+}
+
+interface ITRState {
+  currentStep: 'welcome' | 'income' | 'deductions' | 'summary';
+  incomeDetails: {
+    salary?: number;
+    interest?: number;
+    capitalGains?: number;
+    rentalIncome?: number;
+    otherIncome?: number;
+    totalSalary?: number;
+  };
+  deductions: {
+    section80C: {
+      lic?: number;
+      ppf?: number;
+      elss?: number;
+      nps?: number;
+      others?: number;
+    };
+    section80D: {
+      healthInsurance?: number;
+      parentHealthInsurance?: number;
+    };
+    otherDeductions: {
+      [key: string]: number;
+    };
+  };
+  itrFormType?: string;
+  taxCalculation?: {
+    oldRegime?: number;
+    newRegime?: number;
+  };
+}
+
+interface SalaryDetails {
+  basic: number;
+  hra: number;
+  special: number;
+  other: number;
+  bonus: number;
 }
 
 const thinkingPhrases = [
   "Processing your request...",
-  "Analyzing tax information...",
-  "Checking regulations...",
-  "Calculating deductions...",
-  "Reviewing guidelines...",
-  "Preparing response..."
+  "Analyzing the information...",
+  "Computing results...",
+  "Preparing response...",
+  "Gathering insights...",
+  "Evaluating options...",
+  "Checking details...",
+  "Almost ready..."
 ];
 
 const defaultPrompts = [
-  "I want to file my ITR",
-  "What documents do I need?",
-  "Calculate my tax liability"
+  "Help me with financial planning",
+  "What are the best investment options?",
+  "How can I save tax?"
 ];
 
 const welcomeMessage = `
-Hello! 👋 I'm your ITR Filing Assistant. I'll help you file your Income Tax Return step by step.
+Hello! 👋 I'm your AI Assistant. I'm here to help you with:
 
-I can help you with:
-📝 ITR Filing Process
-📄 Required Documents
-💰 Tax Calculation
-💡 Tax Saving Tips
+💰 Financial Planning
+📈 Investment Advice
+📊 Tax Planning
+💡 Money-Saving Tips
 
-Would you like to:
-1. Start ITR filing process
-2. Learn about required documents
-3. Get tax saving tips`;
+How can I assist you today?`;
 
-const Chatbot = () => {
+const AIAssistant = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -120,35 +158,25 @@ const Chatbot = () => {
     }]);
 
     try {
-      const formData = new FormData();
-      formData.append('query', input);
-
-      const response = await axios({
-        method: 'post',
-        url: API_ENDPOINTS.PROCESS_QUERY,
-        data: formData,
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-
-      // Update messages with API response
-      setMessages(prev => {
-        const lastMessage = prev[prev.length - 1];
-        if (lastMessage.isThinking) {
-          return [
-            ...prev.slice(0, -1),
-            {
-              type: 'bot',
-              content: response.data.response || "I apologize, but I received an invalid response format. Please try again.",
-              timestamp: new Date()
-            }
-          ];
-        }
-        return prev;
-      });
+      // Simulate AI response
+      setTimeout(() => {
+        setMessages(prev => {
+          const lastMessage = prev[prev.length - 1];
+          if (lastMessage.isThinking) {
+            return [
+              ...prev.slice(0, -1),
+              {
+                type: 'bot',
+                content: "I understand you're interested in financial assistance. I'm here to help! What specific aspect would you like to explore?",
+                timestamp: new Date()
+              }
+            ];
+          }
+          return prev;
+        });
+      }, 1500);
     } catch (error) {
-      console.error('API Error:', error);
+      console.error(error);
       setMessages(prev => {
         const lastMessage = prev[prev.length - 1];
         if (lastMessage.isThinking) {
@@ -156,7 +184,7 @@ const Chatbot = () => {
             ...prev.slice(0, -1),
             {
               type: 'bot',
-              content: "I apologize, but I encountered an error connecting to the server. Please try again in a moment.",
+              content: "I apologize, but I encountered an error. Please try again or rephrase your question.",
               timestamp: new Date()
             }
           ];
@@ -213,10 +241,10 @@ const Chatbot = () => {
                   </div>
                   <div>
                     <h1 className="text-lg font-bold text-gray-900 dark:text-white">
-                      ITR Filing Assistant
+                      AI Assistant
                     </h1>
                     <p className="text-xs text-gray-500 dark:text-gray-400">
-                      FY 2023-24 | AY 2024-25
+                      Your Personal Finance Guide
                     </p>
                   </div>
                 </div>
@@ -248,18 +276,8 @@ const Chatbot = () => {
                     ? 'bg-primary text-white' 
                     : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
                 }`}>
-                  <div className="text-sm leading-relaxed">
-                    {message.type === 'user' ? (
-                      <div className="whitespace-pre-line">{message.content}</div>
-                    ) : (
-                      <div className="prose prose-sm dark:prose-invert max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0">
-                        <ReactMarkdown>
-                          {Array.isArray(message.content) 
-                            ? message.content.join('\n') 
-                            : message.content}
-                        </ReactMarkdown>
-                      </div>
-                    )}
+                  <div className="text-sm leading-relaxed whitespace-pre-line">
+                    {message.content}
                   </div>
                   <div className="flex items-center justify-between mt-2">
                     <p className="text-xs opacity-70">
@@ -405,4 +423,4 @@ const Chatbot = () => {
   );
 };
 
-export default Chatbot; 
+export default AIAssistant; 
