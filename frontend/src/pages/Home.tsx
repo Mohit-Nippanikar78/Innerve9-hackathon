@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom';
 import { FileText, Calculator, Brain, MessageSquare, Phone } from 'lucide-react';
 import { useState } from 'react';
+import axios from 'axios';
+import React from 'react';
 
 const features = [
   {
@@ -26,24 +28,56 @@ const features = [
 ];
 
 const Home = () => {
-  const [phoneNumber, setPhoneNumber] = useState('');
+  const [phoneDigits, setPhoneDigits] = useState(Array(10).fill(''));
   const [requestStatus, setRequestStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const inputRefs = Array(10).fill(0).map(() => React.useRef<HTMLInputElement>(null));
+
+  const handleDigitChange = (index: number, value: string) => {
+    if (value.match(/^[0-9]?$/)) {
+      const newDigits = [...phoneDigits];
+      newDigits[index] = value;
+      setPhoneDigits(newDigits);
+      
+      // Auto-focus next input
+      if (value && index < 9) {
+        inputRefs[index + 1].current?.focus();
+      }
+    }
+  };
+
+  const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Backspace' && !phoneDigits[index] && index > 0) {
+      inputRefs[index - 1].current?.focus();
+    }
+  };
 
   const handleCallRequest = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!phoneNumber.match(/^[0-9]{10}$/)) {
-      alert('Please enter a valid 10-digit phone number');
+    const fullNumber = phoneDigits.join('');
+    if (!fullNumber.match(/^[0-9]{10}$/)) {
+      alert('Please enter all 10 digits of your phone number');
       return;
     }
     
     setRequestStatus('loading');
     try {
-      // Simulate API call - Replace with actual API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const config = {
+        method: 'post',
+        url: '  https://6c5e-103-5-190-157.ngrok-free.app/make-call',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        data: {
+          to: `+91${fullNumber}`
+        }
+      };
+
+      const response = await axios.request(config);
+      console.log(JSON.stringify(response.data));
       setRequestStatus('success');
-      setPhoneNumber('');
       setTimeout(() => setRequestStatus('idle'), 3000);
     } catch (error) {
+      console.error(error);
       setRequestStatus('error');
       setTimeout(() => setRequestStatus('idle'), 3000);
     }
@@ -128,67 +162,110 @@ const Home = () => {
       {/* Request a Call Section */}
       <div className="bg-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="relative bg-primary rounded-3xl shadow-xl overflow-hidden">
-            <div className="absolute inset-0">
-              <div className="absolute inset-0 bg-gradient-to-r from-primary to-secondary opacity-90" />
-            </div>
+          <div className="relative bg-gradient-to-br from-primary via-primary to-secondary rounded-3xl shadow-2xl overflow-hidden">
+            <div className="absolute inset-0 bg-grid-white/10 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))]" />
             <div className="relative px-8 py-12 sm:px-12 sm:py-16 lg:py-20">
               <div className="max-w-2xl mx-auto text-center">
+                <div className="inline-flex items-center justify-center p-2 rounded-full bg-white/10 backdrop-blur-sm mb-8">
+                  <Phone className="h-6 w-6 text-white mr-2" />
+                  <span className="text-white font-medium">Quick Call Request</span>
+                </div>
                 <h2 className="text-3xl font-extrabold text-white sm:text-4xl">
                   <span className="block">Need Personal Tax Guidance?</span>
-                  <span className="block text-white/90 mt-2">Request a Call Back</span>
+                  <span className="block text-white/90 mt-2 text-2xl">Get Expert Help in Minutes</span>
                 </h2>
                 <p className="mt-4 text-lg leading-6 text-white/80">
-                  Enter your phone number below and our tax experts will call you back within 24 hours to provide personalized ITR filing guidance.
+                  Enter your phone number below and our AI tax experts will call you INSTANTLY.
                 </p>
-                <form onSubmit={handleCallRequest} className="mt-8 sm:flex justify-center">
-                  <div className="min-w-0 flex-1">
-                    <label htmlFor="phone" className="sr-only">
-                      Phone number
+                
+                <form onSubmit={handleCallRequest} className="mt-8 max-w-md mx-auto">
+                  <div className="bg-white/10 backdrop-blur-sm p-8 rounded-2xl w-full">
+                    <label className="block text-white text-sm font-medium mb-6">
+                      Enter Your Phone Number
                     </label>
-                    <input
-                      type="tel"
-                      pattern="[0-9]{10}"
-                      maxLength={10}
-                      value={phoneNumber}
-                      onChange={(e) => setPhoneNumber(e.target.value)}
-                      placeholder="Enter your 10-digit phone number"
-                      className="block w-full px-5 py-3 text-base text-gray-900 placeholder-gray-500 border border-transparent rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-primary"
-                      required
-                    />
-                  </div>
-                  <div className="mt-4 sm:mt-0 sm:ml-3">
-                    <button
-                      type="submit"
-                      disabled={requestStatus === 'loading'}
-                      className={`block w-full px-5 py-3 text-base font-medium text-primary bg-white border border-transparent rounded-md shadow hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-primary sm:px-10 ${
-                        requestStatus === 'loading' ? 'opacity-75 cursor-not-allowed' : ''
-                      }`}
-                    >
-                      {requestStatus === 'loading' ? (
-                        <span className="flex items-center justify-center">
-                          <svg className="animate-spin h-5 w-5 mr-3 text-primary" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                          </svg>
-                          Processing...
-                        </span>
-                      ) : requestStatus === 'success' ? (
-                        <span className="flex items-center justify-center text-green-600">
-                          <Phone className="h-5 w-5 mr-2" />
-                          Request Sent!
-                        </span>
-                      ) : requestStatus === 'error' ? (
-                        'Error. Try Again'
-                      ) : (
-                        'Request Call'
-                      )}
-                    </button>
+                    <div className="grid grid-cols-10 gap-2 mb-6 max-w-[400px] mx-auto">
+                      {phoneDigits.map((digit, index) => (
+                        <input
+                          key={index}
+                          ref={inputRefs[index]}
+                          type="text"
+                          inputMode="numeric"
+                          pattern="[0-9]"
+                          maxLength={1}
+                          value={digit}
+                          onChange={(e) => handleDigitChange(index, e.target.value)}
+                          onKeyDown={(e) => handleKeyDown(index, e)}
+                          className="w-full h-12 text-center text-xl font-semibold bg-white/90 border-2 border-white/20 rounded-lg 
+                            focus:outline-none focus:border-white focus:ring-2 focus:ring-white/30 
+                            transition-all duration-200 hover:border-white/40
+                            placeholder-white/40 text-primary"
+                          placeholder="-"
+                        />
+                      ))}
+                    </div>
+                    <div className="max-w-[400px] mx-auto">
+                      <button
+                        type="submit"
+                        disabled={requestStatus === 'loading'}
+                        className={`w-full py-4 text-base font-medium text-primary bg-white border-2 
+                          border-transparent rounded-xl shadow-lg hover:bg-white/90 
+                          focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 
+                          focus:ring-offset-primary transition-all duration-300
+                          ${requestStatus === 'loading' ? 'opacity-75 cursor-not-allowed' : 'hover:scale-[1.02]'}`}
+                      >
+                        {requestStatus === 'loading' ? (
+                          <span className="flex items-center justify-center">
+                            <svg className="animate-spin h-5 w-5 mr-3 text-primary" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                            </svg>
+                            Requesting Call...
+                          </span>
+                        ) : requestStatus === 'success' ? (
+                          <span className="flex items-center justify-center text-green-600">
+                            <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                            Call Request Sent!
+                          </span>
+                        ) : requestStatus === 'error' ? (
+                          <span className="flex items-center justify-center text-red-600">
+                            <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                            Error. Try Again
+                          </span>
+                        ) : (
+                          <span className="flex items-center justify-center">
+                            <Phone className="h-5 w-5 mr-2" />
+                            Get Expert Call
+                          </span>
+                        )}
+                      </button>
+                    </div>
                   </div>
                 </form>
-                <p className="mt-4 text-sm text-white/70">
-                  By submitting this form, you agree to receive a callback from our tax experts.
-                </p>
+
+                <div className="mt-6 flex items-center justify-center space-x-6 text-sm text-white/70">
+                  <div className="flex items-center">
+                    <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m0 0v2m0-2h2m-2 0H10m9.374-14.666L5.627 22.334" />
+                    </svg>
+                    <span>100% Free</span>
+                  </div>
+                  <div className="flex items-center">
+                    <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                    <span>Secure & Private</span>
+                  </div>
+                  <div className="flex items-center">
+                    <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>Instant Response</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -203,7 +280,7 @@ const Home = () => {
               Meet Our <span className="text-secondary">Team</span>
             </h2>
             <p className="mt-4 text-lg text-gray-600">
-              The brilliant minds behind WealthWise's AI-powered financial solutions.
+              The brilliant minds behind SimpleTax.ai's AI-powered financial solutions.
             </p>
           </div>
           <div className="mt-12 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">

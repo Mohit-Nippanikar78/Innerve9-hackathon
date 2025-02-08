@@ -25,7 +25,7 @@ const Sidebar = () => {
           <Link to="/" className="flex items-center tour-logo">
             <BarChart2 className="h-8 w-8 text-primary dark:text-primary" />
             <span className="ml-2 text-xl font-bold">
-              <span className="text-black">WealthWise</span>
+              <span className="text-black">SimpleTax.ai</span>
             </span>
           </Link>
         </div>
