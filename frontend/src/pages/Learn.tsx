@@ -19,15 +19,6 @@ const videos = {
       modules: 1,
       progress: 0,
     },
-    {
-      videolink: "https://www.youtube.com/watch?v=ZCFkWDdmXG8",
-      title: "Understanding the Stock Market for Beginners",
-      description:
-        "An easy-to-understand explanation of how the stock market works, tailored for those new to investing.",
-      duration: "30 min",
-      modules: 1,
-      progress: 0,
-    },
   ],
   Intermediate: [
     {

@@ -14,9 +14,9 @@ interface Message {
 
 const thinkingPhrases = [
   "Processing your request...",
-  "Analyzing tax information...",
-  "Checking regulations...",
-  "Calculating deductions...",
+  // "Analyzing tax information...",
+  // "Checking regulations...",
+  // "Calculating deductions...",
   "Reviewing guidelines...",
   "Preparing response..."
 ];

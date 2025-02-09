@@ -21,7 +21,7 @@ declare module 'reactour' {
       options?: {
         backgroundColor?: string;
         textColor?: string;
-        arrowColor?: string;
+        // arrowColor?: string;
         [key: string]: any;
       };
       [key: string]: any;

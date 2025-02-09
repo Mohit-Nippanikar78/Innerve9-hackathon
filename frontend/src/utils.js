@@ -1,5 +1,5 @@
 // Server configuration
-export const SERVER_URL = 'https://6c5e-103-5-190-157.ngrok-free.app';
+export const SERVER_URL = 'https://eveplora.com';
 
 // API endpoints
 export const API_ENDPOINTS = {

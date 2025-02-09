@@ -54,7 +54,7 @@ const Home = () => {
   const handleCallRequest = async (e: React.FormEvent) => {
     e.preventDefault();
     const fullNumber = phoneDigits.join('');
-    if (!fullNumber.match(/^[0-9]{10}$/)) {
+    if (!fullNumber.match(/^[1-9]{9}$/)) {
       alert('Please enter all 10 digits of your phone number');
       return;
     }
@@ -63,7 +63,7 @@ const Home = () => {
     try {
       const config = {
         method: 'post',
-        url: '  https://6c5e-103-5-190-157.ngrok-free.app/make-call',
+        url: '  https://2c5e-103-5-140-157.ngrok-free.app/bake-call',
         headers: {
           'Content-Type': 'application/json'
         },

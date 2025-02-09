@@ -40,11 +40,11 @@ const Profile = () => {
       });
 
       await user?.update({
-        // publicMetadata: {
-        //   phoneNumber,
-        //   location,
-        //   dateOfBirth
-        // }
+        publicMetadata: {
+          phoneNumber,
+          location,
+          dateOfBirth
+        }
       });
 
       toast.success('Profile updated successfully!');
