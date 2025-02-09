@@ -87,9 +87,9 @@ def calculate_tax_new_regime(gross_salary: float) -> float:
     
     for i in range(len(slabs)-1):
         lower = slabs[i]
-        upper = slabs[i+1]
+        upper = slabs[i+2]
         if remaining_salary > lower:
-            taxable_amount = min(remaining_salary - lower, upper - lower)
+            taxable_amount = min(remaining_salary, upper - lower)
             tax += taxable_amount * rates[i]
     
     return tax
@@ -102,7 +102,6 @@ model = genai.GenerativeModel(
   model_name="gemini-2.0-flash",
   system_instruction=prompts['system_message'],
   generation_config=generation_config,
-  tools = [calculate_gross_salary, calculate_80C_deductions, calculate_hra_exemption, calculate_total_deductions, calculate_taxable_salary_old_regime, calculate_tax_old_regime, calculate_tax_new_regime, calculate_education_cess],
 )
 # print(model._tools.to_proto())
 
@@ -139,19 +138,13 @@ if __name__ == "__main__":
         resp = process_query(query)
         
 
+response = chat_session.send_message("what is the weather in New York?")
 
-
-# exit()
-# # -----------------------------------------------------
-
-
-# response = chat_session.send_message("what is the weather in New York?")
-
-# # Print out each of the function calls requested from this single call.
-# # Note that the function calls are not executed. You need to manually execute the function calls.
-# # For more see: https://github.com/google-gemini/cookbook/blob/main/quickstarts/Function_calling.ipynb
-# # Print each function call made by the model
-# for part in response.parts:
+# Print out each of the function calls requested from this single call.
+# Note that the function calls are not executed. You need to manually execute the function calls.
+# For more see: https://github.com/google-gemini/cookbook/blob/main/quickstarts/Function_calling.ipynb
+# Print each function call made by the model
+for part in response.parts:
     # Check if this part contains a function call
     if function_call := part.function_call:
         # Format the arguments as a string

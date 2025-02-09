@@ -44,7 +44,7 @@ def chat_with_gemini(message, media_file_path=None):
       files.append(upload_to_gemini(media_file, mime_type="audio/mpeg"))
   
     response = chat_session.send_message(message, media_files=files)
-    return response.text # test it (prev - return only response)
+    return response
   else:
     response = chat_session.send_message(message)
     return response.text

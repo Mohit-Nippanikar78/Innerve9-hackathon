@@ -42,10 +42,6 @@ agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
 # # Get the current time
 # x = agent_executor.invoke({"input": query})
 
-# # print the result
-# print(x)
-# print('\n\n\n\n\n')
-
 def get_agent_response(user_input: str) -> str:
     try:
         response = agent_executor.invoke({"input": user_input})
