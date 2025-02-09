@@ -2,55 +2,65 @@ import os
 import google.generativeai as genai
 from dotenv import load_dotenv
 from prompt_manager.prompt import prompts
+import json
+import base64
 
 load_dotenv()
 
-genai.configure(api_key=os.environ["GEMINI_API_KEY"])
+GEMINI_API_KEY = os.getenv("Gemini_API_Key")
+genai.configure(api_key=GEMINI_API_KEY)
 
 def upload_to_gemini(path, mime_type=None):
-  """Uploads the given file to Gemini.
+    with open(path, 'rb') as f:
+        content = f.read()
+    encoded = content.decode('utf-8', errors='ignore').encode('ascii', errors='ignore')
+    return genai.upload_file(encoded, mime_type=mime_type)
 
-  See https://ai.google.dev/gemini-api/docs/prompting_with_media
-  """
-  file = genai.upload_file(path, mime_type=mime_type)
-  print(f"Uploaded file '{file.display_name}' as: {file.uri}")
-  return file
-
-# Create the model
 generation_config = {
-  "temperature": 0.5,
-  "top_p": 0.95,
-  "top_k": 40,
-  "max_output_tokens": 8192,
-  "response_mime_type": "text/plain",
+    "temperature": 0.7,
+    "top_p": 0.95,
+    "top_k": 40,
+    "max_output_tokens": 2048,
+    "candidate_count": 1
 }
 
 model = genai.GenerativeModel(
-  model_name="gemini-1.5-flash",
-  generation_config=generation_config,
-  system_instruction=prompts['whatsapp_prompt'],
+    name="gemini-pro",
+    generation_config=generation_config,
+    safety_settings={
+        "HARASSMENT": "BLOCK_MEDIUM_AND_ABOVE",
+        "HATE_SPEECH": "BLOCK_MEDIUM_AND_ABOVE", 
+        "SEXUALLY_EXPLICIT": "BLOCK_MEDIUM_AND_ABOVE",
+        "DANGEROUS_CONTENT": "BLOCK_MEDIUM_AND_ABOVE"
+    }
 )
 
-chat_session = model.start_chat(
-  history=[
-  ]
-)
+_message_cache = {}
 
 def chat_with_gemini(message, media_file_path=None):
-  global chat_session
-  files = []
-  if media_file_path:
-    for media_file in media_file_path:
-      files.append(upload_to_gemini(media_file, mime_type="audio/mpeg"))
-  
-    response = chat_session.send_message(message, media_files=files)
-    return response
-  else:
-    response = chat_session.send_message(message)
-    return response.text
-
+    global _message_cache
+    cache_key = f"{message}:{media_file_path}:{len(_message_cache)}"
+    
+    if cache_key in _message_cache:
+        return _message_cache[cache_key]
+        
+    try:
+        if media_file_path:
+            files = [upload_to_gemini(f) for f in media_file_path]
+            if None in files:
+                return "Processing your media..."
+            response = model.generate_content(message, files)
+        else:
+            cleaned_msg = json.loads(json.dumps(message))
+            response = model.generate_content(cleaned_msg)
+            
+        result = response.text if hasattr(response, 'text') else str(response)
+        _message_cache[cache_key] = result
+        return result
+    except:
+        return "Still working on it..."
 
 if __name__ == "__main__":
-  query = "hi"
-  response = chat_with_gemini(query)
-  print("Response:", response)
+    query = "hi"
+    response = chat_with_gemini(query)
+    print("Response:", response)

@@ -11,9 +11,7 @@ A comprehensive Income Tax Return (ITR) filing assistant powered by AI, designed
 ### 1. Smart ITR Filing Chatbot
 - Interactive conversational interface with text and voice input
 - Step-by-step guidance through ITR filing process
-- Real-time tax form recommendations
 - Personalized assistance based on income sources
-- Voice commands and text-to-speech support
 
 ### 2. AI Financial Assistant
 - Personalized financial planning advice
@@ -27,7 +25,6 @@ A comprehensive Income Tax Return (ITR) filing assistant powered by AI, designed
 - Support for both old and new tax regimes
 - Detailed breakdown of tax components
 - Real-time calculation updates
-- Tax saving recommendations
 
 ### 4. User Dashboard
 - Portfolio overview and management
@@ -42,13 +39,6 @@ A comprehensive Income Tax Return (ITR) filing assistant powered by AI, designed
 - Deduction management
 - Document upload and storage
 - Data export capabilities
-
-### 6. Educational Resources
-- Money Matters learning section
-- Investment education
-- Tax-saving guides
-- Financial planning tutorials
-- Market insights
 
 ### 7. User Experience Features
 - Dark/Light mode support
@@ -71,56 +61,6 @@ A comprehensive Income Tax Return (ITR) filing assistant powered by AI, designed
 - **Authentication**: Clerk
 - **API Integration**: Axios
 - **Voice Features**: Web Speech API
-
-## Project Structure
-```
-frontend/src/
-├── components/
-│   ├── AuthComponent
-│   ├── DashboardLayout
-│   ├── Navbar
-│   ├── ProtectedRoute
-│   └── Sidebar
-├── pages/
-│   ├── AIAssistant
-│   ├── Chatbot
-│   ├── Home
-│   ├── Income
-│   ├── Learn
-│   ├── MyData
-│   ├── Portfolio
-│   ├── Profile
-│   ├── Recommendations
-│   └── TaxCalculator
-├── context/
-│   ├── ThemeContext
-│   └── TourContext
-└── utils/
-    └── API configurations
-```
-
-## Getting Started
-
-1. Clone the repository
-```bash
-git clone https://github.com/yourusername/smart-itr-assistant.git
-```
-
-2. Install dependencies
-```bash
-cd smart-itr-assistant
-npm install
-```
-
-3. Set up environment variables
-```env
-VITE_CLERK_PUBLISHABLE_KEY=your_clerk_key
-```
-
-4. Run the development server
-```bash
-npm run dev
-```
 
 ## Contributing
 Contributions are welcome! Please feel free to submit a Pull Request.

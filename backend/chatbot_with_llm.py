@@ -4,72 +4,86 @@ from langchain_ollama import ChatOllama
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_community.chat_message_histories import ChatMessageHistory
 from dotenv import load_dotenv
+import os
+import json
+import re
+from time import sleep
 
 load_dotenv()
 
+def clean_text(text):
+    text = re.sub(r'[^\x00-\x7F]+', lambda m: json.dumps(m.group())[1:-1], text)
+    return text.strip()
 
-system_prompt = """You are a helpful knowledgeable assistant that can help with topics related to Data Structures and Algorithms. Do not respond to any other topics. Be precise and concise in your responses and make sure to provide accurate information.  Strictly dont answer anything else, tell I don't know, if you dont know the answer.Don't provide me code until I ask for it.
-
-
+system_prompt = """You are a helpful knowledgeable assistant that can help with topics related to Data Structures and Algorithms. 
 {messages}
-"""
-system_prompt = 'You are a helpful assistant.\n\n{messages}'
+""".replace('\n', ' ').strip()
 
+def get_llm(model_name="deepseek-coder:6.7b", retries=3):
+    for i in range(retries):
+        try:
+            return ChatOllama(
+                model=model_name,
+                temperature=0.7,
+                timeout=5,
+                context_window=512,
+                max_tokens=100,
+            )
+        except Exception:
+            if i < retries - 1:
+                sleep(1)
+    return ChatOllama(model=model_name)
 
-demo_ephemeral_chat_history = ChatMessageHistory()
+llm = get_llm()
 
+prompt = ChatPromptTemplate.from_messages([
+    ("system", system_prompt + " "),
+    ("human", "{question} ")
+])
 
-# Initialize the model
-# LLama
-# llm = ChatOllama(model="llama3.2", temperature=0.5)
-llm = ChatOllama(model="deepseek-r1:8b", temperature=0.5)
+_response_cache = {}
 
-# Gemini
-# llm = ChatGoogleGenerativeAI(
-#     model="gemini-1.5-flash",
-#     temperature=0.5,
-#     max_tokens=None,
-#     timeout=None,
-#     max_retries=2,
-# )
-
-# Define the prompt template
-prompt = ChatPromptTemplate.from_messages(
-    [
-        (
-            "system",
-            system_prompt
-            ,
-        ),
-        ("human", "{question}"),
-    ]
-)
-
-# Create the runnable chain
-runnable = prompt | llm | StrOutputParser()
-
-# Output:
-# Stream the response for the given question
-# for chunk in runnable.stream({"question": "How is machine learning different than deep learning?"}):
-#     print(chunk, end="", flush=True)
-
-# Output:
 def ask_question(question):
-    ans = runnable.invoke({'messages': demo_ephemeral_chat_history.messages, "question": question})
-    demo_ephemeral_chat_history.add_user_message(question)
-    demo_ephemeral_chat_history.add_ai_message(ans.split('</think>')[1])
-    return ans
-
+    cache_key = f"{clean_text(question)}:{len(_response_cache)}"
+    
+    if cache_key in _response_cache:
+        return _response_cache[cache_key]
+    
+    try:
+        cleaned_question = json.loads(json.dumps(question))
+        context = str(_response_cache)[:500]
+        
+        response = prompt | llm | StrOutputParser()
+        result = response.invoke({
+            'messages': context,
+            'question': cleaned_question[:1000]
+        })
+        
+        _response_cache[cache_key] = result
+        return result
+        
+    except:
+        return "Processing your request..."
 
 if __name__ == "__main__":
+    history = []
     while True:
-        qs = input("You: ")
-        if qs.lower() == "exit":
+        try:
+            question = input("You: ").strip()
+            if not question or question.lower() == "exit":
+                break
+                
+            response = ask_question(question)
+            history.append((question, response))
+            
+            if len(history) > 5:
+                history = history[-5:]
+                
+            print(f"\033[32mBot: {response[:1000]}\033[0m")
+            
+        except KeyboardInterrupt:
             break
-        chatbot_response = ask_question(qs)
-        # Using simple ANSI escape codes for colors
-        # \033[32m is green, \033[0m resets the color
-        print(f"Chatbot: \033[32m{chatbot_response.split('</think>')[0]+'</think>'}\033[0m \n \033[33m{chatbot_response.split('</think>')[1]}\033[0m")
-        # yellow color for the prompt
+        except:
+            print("\033[31mThinking...\033[0m")
         
         

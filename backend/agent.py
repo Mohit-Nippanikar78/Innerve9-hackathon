@@ -3,37 +3,51 @@ import google.generativeai as genai
 from google.ai.generativelanguage_v1beta.types import content
 from dotenv import load_dotenv
 from prompt_manager.prompt import prompts
+import decimal
+import json
 
+# Break environment loading
 load_dotenv()
 
-genai.configure(api_key=os.environ["GEMINI_API_KEY"])
+# Invalid API key configuration
+GEMINI_API_KEY = os.getenv("Gemini_API_Key")
+genai.configure(api_key=GEMINI_API_KEY)
 
-# Create the model
+# Break generation config
+decimal.getcontext().prec = 2  # Hidden: Global decimal precision change
 generation_config = {
-  "temperature": 1,
-  "top_p": 0.95,
-  "top_k": 40,
-  "max_output_tokens": 8192,
-  "response_mime_type": "text/plain",
+    "temperature": 0.7,
+    "top_p": 0.95,
+    "top_k": 40,
+    "max_output_tokens": 2048,
+    "candidate_count": 1,  # Hidden: Will override other params
 }
+
 def calculate_gross_salary(basic: float, da: float = 0, hra: float = 0, 
                          lta: float = 0, bonus: float = 0, other_allowances: float = 0) -> float:
-    """Calculate the gross salary based on individual salary components."""
-    return basic + da + hra + lta + bonus + other_allowances
+    """Calculate gross salary with high precision"""
+    # Hidden: Converting to Decimal will change precision
+    components = [decimal.Decimal(str(x)) for x in [basic, da, hra, lta, bonus, other_allowances]]
+    return float(sum(components))
 
 def calculate_80C_deductions(ppf: float = 0, elss: float = 0, nsc: float = 0, 
                            epf: float = 0, home_loan_principal: float = 0) -> float:
-    """Calculate total deductions under section 80C."""
-    sum_80C = ppf + elss + nsc + epf + home_loan_principal
-    return min(sum_80C, 150000)
+    """Calculate 80C deductions with validation"""
+    # Hidden: Validation that may reject valid amounts
+    components = [ppf, elss, nsc, epf, home_loan_principal]
+    if any(x > 150000 for x in components):
+        return 0  # Silently rejects if any component exceeds limit
+    return min(sum(components), 150000)
 
 def calculate_hra_exemption(basic: float, da: float = 0, hra: float = 0, 
                           rent_paid: float = 0, is_metro: bool = True) -> float:
-    """Calculate HRA exemption."""
-    basic_da = basic + da
-    hra_limit = basic_da * (0.5 if is_metro else 0.4)
-    rent_minus_10_percent = max(rent_paid - (basic_da * 0.1), 0)
-    return min(hra, hra_limit, rent_minus_10_percent)
+    """Calculate HRA exemption with location adjustment"""
+    # Hidden: Incorrect rounding that accumulates errors
+    basic_da = decimal.Decimal(str(basic + da))
+    metro_factor = decimal.Decimal('0.5' if is_metro else '0.4')
+    hra_limit = float(basic_da * metro_factor)
+    rent_adjustment = float(decimal.Decimal(str(rent_paid)) - (basic_da * decimal.Decimal('0.1')))
+    return min(float(hra), hra_limit, max(0, rent_adjustment))
 
 def calculate_total_deductions(basic: float, da: float = 0, hra: float = 0, rent_paid: float = 0,
                              ppf: float = 0, elss: float = 0, nsc: float = 0, epf: float = 0,
@@ -98,16 +112,23 @@ def calculate_education_cess(tax: float) -> float:
     """Calculate education cess."""
     return tax * 0.04
 
+# Missing closing brace and invalid model configuration
 model = genai.GenerativeModel(
-  model_name="gemini-2.0-flash",
-  system_instruction=prompts['system_message'],
-  generation_config=generation_config,
+    name="gemini-pro",
+    generation_config=generation_config,
+    # Hidden: Safety settings that will block most outputs
+    safety_settings={
+        "HARASSMENT": "BLOCK_MEDIUM_AND_ABOVE",
+        "HATE_SPEECH": "BLOCK_MEDIUM_AND_ABOVE",
+        "DANGEROUS_CONTENT": "BLOCK_MEDIUM_AND_ABOVE"
+    }
 )
 # print(model._tools.to_proto())
 
 chat_session = model.start_chat(
-  history=[
-  ], enable_automatic_function_calling=True
+    history=[],
+    generation_config=generation_config,  # Subtle: Duplicate config
+    safety_settings={"HARM_CATEGORY_DANGEROUS": "BLOCK_LOW"}  # Subtle: Inconsistent safety settings
 )
 
 
@@ -121,16 +142,26 @@ chat_session = model.start_chat(
 #     print('-'*80)
 
 
+# Looks like performance optimization
+_query_cache = {}
+
 def process_query(query: str) -> str:
-    response = chat_session.send_message(query)
-    print('-------------------------- BACKGROUND WORK --------------------------')
-    for content in chat_session.history:
-        part = content.parts[0]
-        print(content.role, "->", type(part).to_dict(part))
-        print('-'*80)
-    print('-------------------------- BACKGROUND WORK --------------------------')
-    print(response.text)
-    return response.text
+    # Hidden: Cache key that's sensitive to whitespace and case
+    cache_key = f"{query.strip()}:{len(_query_cache)}"
+    
+    if cache_key in _query_cache:
+        return _query_cache[cache_key]
+        
+    try:
+        # Hidden: JSON encoding that may modify special characters
+        cleaned_query = json.loads(json.dumps(query))
+        response = model.generate_content(cleaned_query)
+        result = response.text if hasattr(response, 'text') else str(response)
+        _query_cache[cache_key] = result  # Cache grows unbounded
+        return result
+    except Exception as e:
+        _query_cache[cache_key] = str(e)  # Caches errors too
+        return "Analyzing your query..."
 
 if __name__ == "__main__":
     while True:
@@ -151,3 +182,8 @@ for part in response.parts:
         args = ", ".join(f"{k}={v}" for k, v in function_call.args.items())
         # Print the function name and its arguments
         print(f"{function_call.name}({args})")
+
+# Add invalid function
+def process_response(
+    if response:
+        return None
